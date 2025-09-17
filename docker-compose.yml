@@ -1,0 +1,40 @@
+version: '3.9'
+
+services:
+  mongo:
+    image: mongo:7
+    container_name: skillboard-mongo
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_DATABASE: skillboard
+    volumes:
+      - skillboard_data:/data/db
+    ports:
+      - "27017:27017"
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: skillboard-backend
+    restart: unless-stopped
+    env_file:
+      - backend/.env
+    depends_on:
+      - mongo
+    ports:
+      - "5000:5000"
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: skillboard-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "3000:80"
+
+volumes:
+  skillboard_data:
